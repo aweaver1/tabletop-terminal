@@ -183,7 +183,7 @@ const enablePasswordKeyStrokes = () => {
           term.writeln('');
           term.writeln('');
           await typewriteString('Just kidding... ;)');
-          await waitFor(5000);
+          await waitFor(3000);
 
           window.location.reload();
         } else {
