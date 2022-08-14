@@ -173,9 +173,11 @@ const enablePasswordKeyStrokes = () => {
 
           const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=+!@#$%^&*();:,<.>/?';
           let result = '';
+
           for (let i = 0; i < 5000; i++ ) {
             result += characters.charAt(Math.floor(Math.random() * characters.length));
           }
+
           term.write(`\x1b[H`);
           await typewriteString(result, 1);
 
@@ -188,9 +190,11 @@ const enablePasswordKeyStrokes = () => {
           window.location.reload();
         } else {
           await waitFor(100);
+          lines[lines.length - 1] = '';
           term.write('password: ');
           attempts--;
         }
+
         return;
       }
 
