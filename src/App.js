@@ -8,6 +8,8 @@ import { FitAddon } from 'xterm-addon-fit';
 
 const waitFor = delay => new Promise(resolve => setTimeout(resolve, delay));
 
+const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=+!@#$%^&*();:,<.>/?';
+
 const term = new Terminal();
 term.setOption('cursorStyle', 'underline')
 
@@ -27,6 +29,12 @@ const imageMap = {
 const audioMap = {
   't-rex-roar.mp3': require('./assets/t-rex-roar.mp3')
 }
+
+const klaxon = new Audio(require('./assets/klaxon.mp3'));
+klaxon.addEventListener('ended', function() {
+    this.currentTime = 0;
+    this.play();
+}, false);
 
 let commandMap = {};
 
@@ -160,6 +168,8 @@ const enablePasswordKeyStrokes = () => {
           await typewriteString('Unauthorized access detected.');
           term.writeln('');
 
+          klaxon.play();
+
           await waitFor(200);
           term.writeln('');
 
@@ -171,15 +181,12 @@ const enablePasswordKeyStrokes = () => {
             await waitFor(1000);
           }
 
-          const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=+!@#$%^&*();:,<.>/?';
-          let result = '';
+          term.write(`\x1b[H`);
 
           for (let i = 0; i < 5000; i++ ) {
-            result += characters.charAt(Math.floor(Math.random() * characters.length));
+            await waitFor(1);
+            term.write(characters.charAt(Math.floor(Math.random() * characters.length)));
           }
-
-          term.write(`\x1b[H`);
-          await typewriteString(result, 1);
 
           await waitFor(1000);
           term.writeln('');
