@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/tabletop-terminal/static/css/main.76ef7aa0.css",
+    "main.js": "/tabletop-terminal/static/js/main.4845920d.js",
+    "static/js/787.942201f0.chunk.js": "/tabletop-terminal/static/js/787.942201f0.chunk.js",
+    "index.html": "/tabletop-terminal/index.html",
+    "main.76ef7aa0.css.map": "/tabletop-terminal/static/css/main.76ef7aa0.css.map",
+    "main.4845920d.js.map": "/tabletop-terminal/static/js/main.4845920d.js.map",
+    "787.942201f0.chunk.js.map": "/tabletop-terminal/static/js/787.942201f0.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.76ef7aa0.css",
+    "static/js/main.4845920d.js"
+  ]
+}
