@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/tabletop-terminal/static/css/main.f8862f00.css",
-    "main.js": "/tabletop-terminal/static/js/main.705d0412.js",
+    "main.js": "/tabletop-terminal/static/js/main.de7fc071.js",
     "static/js/787.942201f0.chunk.js": "/tabletop-terminal/static/js/787.942201f0.chunk.js",
     "static/media/t-rex-roar.mp3": "/tabletop-terminal/static/media/t-rex-roar.37424eef13efee311860.mp3",
     "static/media/ms_sans_serif.woff": "/tabletop-terminal/static/media/ms_sans_serif.aac84aa6de42b83d1a62.woff",
@@ -10,11 +10,11 @@
     "static/media/ms_sans_serif_bold.woff2": "/tabletop-terminal/static/media/ms_sans_serif_bold.7fcf57cc6e87ecddbf64.woff2",
     "index.html": "/tabletop-terminal/index.html",
     "main.f8862f00.css.map": "/tabletop-terminal/static/css/main.f8862f00.css.map",
-    "main.705d0412.js.map": "/tabletop-terminal/static/js/main.705d0412.js.map",
+    "main.de7fc071.js.map": "/tabletop-terminal/static/js/main.de7fc071.js.map",
     "787.942201f0.chunk.js.map": "/tabletop-terminal/static/js/787.942201f0.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f8862f00.css",
-    "static/js/main.705d0412.js"
+    "static/js/main.de7fc071.js"
   ]
 }
