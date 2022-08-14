@@ -9,11 +9,16 @@ import { FitAddon } from 'xterm-addon-fit';
 const waitFor = delay => new Promise(resolve => setTimeout(resolve, delay));
 
 const term = new Terminal();
+term.setOption('cursorStyle', 'underline')
 
 term.loadAddon(new WebLinksAddon());
 
-const fitAddon = new FitAddon()
-term.loadAddon(fitAddon)
+const fitAddon = new FitAddon();
+term.loadAddon(fitAddon);
+
+const credentialMap = {
+  dweaver: 'vinegar'
+}
 
 const imageMap = {
   'react.png': require('./assets/react.png')
@@ -74,13 +79,14 @@ const buildCommandMap = (setImageName, setWindowOpen) => ({
   }
 })
 
+let login = 'redacted';
 let commandPrefix = 'redacted@redacted:~$ ';
 const lines = [''];
 
-const typewriteString = async (str) => {
+const typewriteString = async (str, delay) => {
   for (let char of str.split('')) {
     term.write(char);
-    await waitFor(50)
+    await waitFor(delay ? delay : 50)
   }
 }
 
@@ -92,6 +98,8 @@ const handleCharacterKeystroke = (key, domEvent, hidden) => {
 }
 
 const enableLoginKeyStrokes = () => {
+  term.write('login: ');
+
   const handler = term.onKey(({key, domEvent}) => {
     const charCode = key.charCodeAt(0);
 
@@ -102,6 +110,7 @@ const enableLoginKeyStrokes = () => {
 
       handler.dispose();
 
+      login = command;
       commandPrefix = `${command}@redacted:~$ `
 
       term.writeln('');
@@ -112,7 +121,6 @@ const enableLoginKeyStrokes = () => {
         return;
       }
 
-      term.write('password: ');
       enablePasswordKeyStrokes();
     } else if (charCode === 127) { // Backspace
       if (!lines[lines.length - 1]) return;
@@ -128,6 +136,9 @@ const enableLoginKeyStrokes = () => {
 }
 
 const enablePasswordKeyStrokes = () => {
+  let attempts = 2;
+  term.write('password: ')
+
   const handler = term.onKey(async ({key, domEvent}) => {
     const charCode = key.charCodeAt(0);
 
@@ -135,6 +146,53 @@ const enablePasswordKeyStrokes = () => {
        const command = lines[lines.length - 1].trim();
 
       if (!command) return;
+
+      if (command !== credentialMap[login]) {
+        await waitFor(200);
+        term.write(`\x1b[0G`);
+        term.writeln(`Invalid credentials. ${attempts} attempts remaining.`);
+
+        if (!attempts) {
+          handler.dispose();
+          await waitFor(1000);
+
+          term.writeln('');
+          await typewriteString('Unauthorized access detected.');
+          term.writeln('');
+
+          await waitFor(200);
+          term.writeln('');
+
+          await typewriteString('Initiating drone strike in: ');
+
+          for (let i = 10; i >= 0; i--) {
+            term.write(`\x1b[0G`);
+            term.write(`Initiating drone strike in: ${i} `);
+            await waitFor(1000);
+          }
+
+          const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=+!@#$%^&*();:,<.>/?';
+          let result = '';
+          for (let i = 0; i < 5000; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+          }
+          term.write(`\x1b[H`);
+          await typewriteString(result, 1);
+
+          await waitFor(1000);
+          term.writeln('');
+          term.writeln('');
+          await typewriteString('Just kidding... ;)');
+          await waitFor(5000);
+
+          window.location.reload();
+        } else {
+          await waitFor(100);
+          term.write('password: ');
+          attempts--;
+        }
+        return;
+      }
 
       handler.dispose();
       term.blur();
@@ -223,7 +281,6 @@ let opened = false;
 const runStartup = () => {
   term.writeln('\x1B[32m');
 
-  term.write('login: ');
   term.focus();
 
   enableLoginKeyStrokes();
