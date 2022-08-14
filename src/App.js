@@ -15,6 +15,14 @@ term.loadAddon(new WebLinksAddon());
 const fitAddon = new FitAddon()
 term.loadAddon(fitAddon)
 
+const imageMap = {
+  'react.png': require('./assets/react.png')
+}
+
+const audioMap = {
+  't-rex-roar.mp3': require('./assets/t-rex-roar.mp3')
+}
+
 let commandMap = {};
 
 const buildCommandMap = (setImageName, setWindowOpen) => ({
@@ -22,12 +30,25 @@ const buildCommandMap = (setImageName, setWindowOpen) => ({
     func: () => term.writeln(''),
   },
   help: {
-    func: () => term.writeln('Help is coming.'),
+    func: () => {
+      term.writeln('    list: List all files in the current directory.');
+      term.writeln('    view: View an image file in the current directory (e.g., view myimage.png).');
+      term.writeln('    play: Play an audio file in the current directory (e.g., play myaudio.mp3).');
+    }
+  },
+  list: {
+    func: () => {
+      [...Object.keys(imageMap), ...Object.keys(audioMap)].forEach((key) => term.writeln('    ' + key));
+    }
   },
   view: {
     func: (fileName) => {
-      if (!fileName) {
-        term.writeln('Expected argument $fileName. Try \'help\' for more information.');
+      if (!imageMap[fileName]) {
+        if (!fileName) {
+          term.writeln('Expected argument $fileName. Try \'help\' for more information.');
+        } else {
+          term.writeln(`Image file ${fileName} not found.`)
+        }
         return;
       }
       disableKeyStrokes();
@@ -37,11 +58,15 @@ const buildCommandMap = (setImageName, setWindowOpen) => ({
   },
   play: {
     func: (fileName) => {
-      if (!fileName) {
-        term.writeln('Expected argument $fileName. Try \'help\' for more information.');
+      if (!audioMap[fileName]) {
+        if (!fileName) {
+          term.writeln('Expected argument $fileName. Try \'help\' for more information.');
+        } else {
+          term.writeln(`Audio file ${fileName} not found.`)
+        }
         return;
       }
-      new Audio(require(`./assets/${fileName}`)).play();
+      new Audio(audioMap[fileName]).play();
     }
   },
   fallback: {
@@ -283,14 +308,12 @@ function App() {
             </div>
           </div>
           <div className="window-body">
-            <img src={require(`./assets/${imageName}`)} />
+            <img src={imageMap[imageName]} />
           </div>
         </div>
       }
     </>
   )
 }
-
-
 
 export default App;
