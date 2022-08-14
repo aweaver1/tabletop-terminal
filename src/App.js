@@ -5,6 +5,8 @@ import { Terminal } from 'xterm';
 import { WebLinksAddon } from 'xterm-addon-web-links';
 import { FitAddon } from 'xterm-addon-fit';
 
+const mp3 = require('./assets/t-rex-roar.mp3');
+
 const waitFor = delay => new Promise(resolve => setTimeout(resolve, delay));
 
 const term = new Terminal();
@@ -13,34 +15,60 @@ const fitAddon = new FitAddon()
 term.loadAddon(fitAddon)
 
 const commandMap = {
-  help: () => term.writeln('Help is coming.'),
+  '': () => term.writeln(''),
+  help: () => term.writeln('Help is coming. ' + (window.location.origin + mp3)),
   fallback: () => term.writeln('Unrecognized command. Try \'help\' for more information.')
 }
 
-let commandPrefix = 'unknown@unknown:~$ ';
+let commandPrefix = 'redacted@redacted:~$ ';
 const lines = [''];
+
+const typewriteString = async (str) => {
+  for (let char of str.split('')) {
+    term.write(char);
+    await waitFor(50)
+  }
+}
+
+const handleCharacterKeystroke = (key, domEvent, hidden) => {
+  if (key.charCodeAt(0) !== 27 && !domEvent.ctrlKey && !domEvent.altKey) { // Arrows and modifiers
+    lines[lines.length - 1] = lines[lines.length - 1] + key;
+    if (!hidden) term.write(key);
+  }
+}
 
 let keystrokeHandler;
 
 const enableKeyStrokes = () => {
-  keystrokeHandler = term.onKey(({key, ev}) => {
-      if (key.charCodeAt(0) === 13) {
-        const command = lines[lines.length - 1];
+  keystrokeHandler = term.onKey(({key, domEvent}) => {
+    const charCode = key.charCodeAt(0);
 
-        term.writeln('');
-        lines.push('')
+    if (charCode === 13) { // Enter
+      const command = lines[lines.length - 1].trim();
 
-        if (commandMap[command]) {
-          commandMap[command]()
-        } else {
-          commandMap.fallback()
-        }
+      term.writeln('');
 
-        term.write(commandPrefix);
-      } else {
-        lines[lines.length - 1] = lines[lines.length - 1] + key;
-        term.write(key);
+      if (command) {
+        lines.push('');
       }
+
+      if (commandMap[command]) {
+        commandMap[command]()
+      } else {
+        commandMap.fallback()
+      }
+
+      term.write(commandPrefix);
+    } else if (charCode === 127) { // Backspace
+      if (!lines[lines.length - 1]) return;
+
+      lines[lines.length - 1] = lines[lines.length - 1].slice(0, -1);
+      term.write('\x1b[1D');
+      term.write(' ');
+      term.write('\x1b[1D');
+    } else {
+      handleCharacterKeystroke(key, domEvent);
+    }
   });
 }
 
@@ -49,54 +77,86 @@ const disableKeyStrokes = () => {
 }
 
 const enableLoginKeyStrokes = () => {
-  const handler = term.onKey(({key, ev}) => {
-      if (key.charCodeAt(0) === 13) {
-        handler.dispose();
+  const handler = term.onKey(({key, domEvent}) => {
+    const charCode = key.charCodeAt(0);
 
-        const command = lines[lines.length - 1];
-        commandPrefix = `${command}@unknown:~$ `
+    if (charCode === 13) { // Enter
+      const command = lines[lines.length - 1].trim();
 
-        term.writeln('');
-        lines.push('');
+      if (!command) return;
 
-        term.write('password: ');
-        enablePasswordKeyStrokes();
-      } else {
-        lines[lines.length - 1] = lines[lines.length - 1] + key;
-        term.write(key);
+      handler.dispose();
+
+      commandPrefix = `${command}@redacted:~$ `
+
+      term.writeln('');
+      lines.push('');
+
+      if (command === 'bypass') {
+        enableKeyStrokes();
+        return;
       }
+
+      term.write('password: ');
+      enablePasswordKeyStrokes();
+    } else if (charCode === 127) { // Backspace
+      if (!lines[lines.length - 1]) return;
+
+      lines[lines.length - 1] = lines[lines.length - 1].slice(0, -1);
+      term.write('\x1b[1D');
+      term.write(' ');
+      term.write('\x1b[1D');
+    } else {
+      handleCharacterKeystroke(key, domEvent);
+    }
   });
 }
 
 const enablePasswordKeyStrokes = () => {
-  const handler = term.onKey(async ({key, ev}) => {
-      if (key.charCodeAt(0) === 13) {
-        handler.dispose();
+  const handler = term.onKey(async ({key, domEvent}) => {
+    const charCode = key.charCodeAt(0);
 
-        const command = lines[lines.length - 1];
-        lines.push('')
+    if (charCode === 13) {
+       const command = lines[lines.length - 1].trim();
 
-        term.writeln('');
-        term.writeln('');
+      if (!command) return;
 
-        for (let i = 0; i < 12; i++) {
-          term.write('Authenticating' + Array(i % 4).fill('.').join('') + '    ');
+      handler.dispose();
+      term.blur();
+
+      lines.push('')
+
+      term.writeln('');
+      term.writeln('');
+
+      for (let i = 0; i < 12; i++) {
+        if (!i) {
+          await typewriteString('Authenticating');
+        } else {
+          const dots = i % 4;
+
           term.write(`\x1b[0G`);
-          await waitFor(200);
+          term.write('Authenticating' + Array(dots).fill('.').join('') + Array(3 - dots).fill(' ').join(''));
         }
 
-        term.writeln('');
-        term.writeln('');
-
-        term.writeln('Authentication successful.');
-        term.writeln('');
-
-        await waitFor(500);
-
-        runConnectionSequence();
-      } else {
-        lines[lines.length - 1] = lines[lines.length - 1] + key;
+        await waitFor(200);
       }
+
+      term.writeln('');
+      term.writeln('');
+
+      term.writeln('Authentication successful.');
+      term.writeln('');
+
+      await waitFor(500);
+
+      runConnectionSequence();
+    } else if (charCode === 127) { // Backspace
+      if (!lines[lines.length - 1]) return;
+      lines[lines.length - 1] = lines[lines.length - 1].slice(0, -1);
+    } else {
+      handleCharacterKeystroke(key, domEvent, true);
+    }
   });
 }
 
@@ -105,7 +165,8 @@ let opened = false;
 const runStartup = () => {
   term.writeln('\x1B[32m');
 
-  term.write('login: ')
+  term.write('login: ');
+  term.focus();
 
   enableLoginKeyStrokes();
 }
@@ -116,21 +177,17 @@ const runConnectionSequence = async () => {
     const indent = '                  ';
 
     for (let i = 0; i <= 20; i++) {
+      term.write(`\x1b[0G`);
       const loaderPrefix = 'Establishing secure connection... '
       const loader = `${Array(i).fill('=').join('')}${Array(20 - i).fill('-').join('')} ${i * 5}%`
-      const str = loaderPrefix + loader;
 
       if (!i) {
-        for (let char of loaderPrefix.split('')) {
-          term.write(char);
-          await waitFor(50)
-        }
+        await typewriteString(loaderPrefix)
         term.write(loader);
       } else {
-        term.write(str);
+        term.write(loaderPrefix + loader);
       }
 
-      term.write(`\x1b[0G`);
       await waitFor(500)
     }
 
@@ -150,14 +207,16 @@ const runConnectionSequence = async () => {
 
     await waitFor(500)
 
-    term.writeln('')
-    term.writeln('Welcome Agent.')
+    term.writeln('');
+    await typewriteString('Welcome Agent.');
+    term.writeln('');
 
     await waitFor(500)
 
     term.writeln('')
     term.write(commandPrefix)
 
+    term.focus();
     enableKeyStrokes();
 }
 
