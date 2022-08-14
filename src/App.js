@@ -1,24 +1,53 @@
 import './App.css';
 import 'xterm/css/xterm.css';
+import '98.css/dist/98.css';
 import * as React from 'react';
 import { Terminal } from 'xterm';
 import { WebLinksAddon } from 'xterm-addon-web-links';
 import { FitAddon } from 'xterm-addon-fit';
 
-const mp3 = require('./assets/t-rex-roar.mp3');
-
 const waitFor = delay => new Promise(resolve => setTimeout(resolve, delay));
 
 const term = new Terminal();
+
 term.loadAddon(new WebLinksAddon());
+
 const fitAddon = new FitAddon()
 term.loadAddon(fitAddon)
 
-const commandMap = {
-  '': () => term.writeln(''),
-  help: () => term.writeln('Help is coming. ' + (window.location.origin + mp3)),
-  fallback: () => term.writeln('Unrecognized command. Try \'help\' for more information.')
-}
+let commandMap = {};
+
+const buildCommandMap = (setImageName, setWindowOpen) => ({
+  '': {
+    func: () => term.writeln(''),
+  },
+  help: {
+    func: () => term.writeln('Help is coming.'),
+  },
+  view: {
+    func: (fileName) => {
+      if (!fileName) {
+        term.writeln('Expected argument $fileName. Try \'help\' for more information.');
+        return;
+      }
+      disableKeyStrokes();
+      setImageName(fileName);
+      setWindowOpen(true);
+    }
+  },
+  play: {
+    func: (fileName) => {
+      if (!fileName) {
+        term.writeln('Expected argument $fileName. Try \'help\' for more information.');
+        return;
+      }
+      new Audio(require(`./assets/${fileName}`)).play();
+    }
+  },
+  fallback: {
+    func: () => term.writeln('Unrecognized command. Try \'help\' for more information.')
+  }
+})
 
 let commandPrefix = 'redacted@redacted:~$ ';
 const lines = [''];
@@ -35,45 +64,6 @@ const handleCharacterKeystroke = (key, domEvent, hidden) => {
     lines[lines.length - 1] = lines[lines.length - 1] + key;
     if (!hidden) term.write(key);
   }
-}
-
-let keystrokeHandler;
-
-const enableKeyStrokes = () => {
-  keystrokeHandler = term.onKey(({key, domEvent}) => {
-    const charCode = key.charCodeAt(0);
-
-    if (charCode === 13) { // Enter
-      const command = lines[lines.length - 1].trim();
-
-      term.writeln('');
-
-      if (command) {
-        lines.push('');
-      }
-
-      if (commandMap[command]) {
-        commandMap[command]()
-      } else {
-        commandMap.fallback()
-      }
-
-      term.write(commandPrefix);
-    } else if (charCode === 127) { // Backspace
-      if (!lines[lines.length - 1]) return;
-
-      lines[lines.length - 1] = lines[lines.length - 1].slice(0, -1);
-      term.write('\x1b[1D');
-      term.write(' ');
-      term.write('\x1b[1D');
-    } else {
-      handleCharacterKeystroke(key, domEvent);
-    }
-  });
-}
-
-const disableKeyStrokes = () => {
-  keystrokeHandler?.dispose();
 }
 
 const enableLoginKeyStrokes = () => {
@@ -160,6 +150,49 @@ const enablePasswordKeyStrokes = () => {
   });
 }
 
+const disableKeyStrokes = () => {
+  keystrokeHandler?.dispose();
+}
+
+let keystrokeHandler;
+
+const enableKeyStrokes = () => {
+  term.focus();
+  keystrokeHandler = term.onKey(({key, domEvent}) => {
+    const charCode = key.charCodeAt(0);
+
+    if (charCode === 13) { // Enter
+      const line = lines[lines.length - 1].trim();
+
+      term.writeln('');
+
+      if (line) {
+        lines.push('');
+      }
+
+      const command = line.split(' ')[0];
+      const args = line.split(' ').slice(1).filter(arg => !!arg);
+
+      if (commandMap[command]) {
+        commandMap[command].func(...args)
+      } else {
+        commandMap.fallback.func()
+      }
+
+      term.write(commandPrefix);
+    } else if (charCode === 127) { // Backspace
+      if (!lines[lines.length - 1]) return;
+
+      lines[lines.length - 1] = lines[lines.length - 1].slice(0, -1);
+      term.write('\x1b[1D');
+      term.write(' ');
+      term.write('\x1b[1D');
+    } else {
+      handleCharacterKeystroke(key, domEvent);
+    }
+  });
+}
+
 let opened = false;
 
 const runStartup = () => {
@@ -222,9 +255,13 @@ const runConnectionSequence = async () => {
 
 function App() {
   const termRef = React.useRef(null)
+  const [imageName, setImageName] = React.useState();
+  const [windowOpen, setWindowOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (termRef.current && !opened) {
+      commandMap = buildCommandMap(setImageName, setWindowOpen);
+
       term.open(termRef.current)
       fitAddon.fit();
 
@@ -232,11 +269,28 @@ function App() {
 
       opened = true;
     }
-  })
+  });
 
   return (
-    <div id="term" ref={termRef} style={{ height: '100vh' }}/>
+    <>
+      <div id="term" ref={termRef} style={{ height: '100vh', minWidth: '600px' }} />
+      {windowOpen &&
+        <div className="window" style={{position: 'fixed', margin: '10% 20%', top: 0, left: 0, zIndex: 100}}>
+          <div className="title-bar">
+            <div className="title-bar-text">{imageName}</div>
+            <div className="title-bar-controls">
+              <button aria-label="Close" onClick={() => { setWindowOpen(false); enableKeyStrokes(); }} />
+            </div>
+          </div>
+          <div className="window-body">
+            <img src={require(`./assets/${imageName}`)} />
+          </div>
+        </div>
+      }
+    </>
   )
 }
+
+
 
 export default App;
