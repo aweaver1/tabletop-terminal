@@ -6,7 +6,21 @@ import { Terminal } from 'xterm';
 import { WebLinksAddon } from 'xterm-addon-web-links';
 import { FitAddon } from 'xterm-addon-fit';
 
-const waitFor = delay => new Promise(resolve => setTimeout(resolve, delay));
+const waitFor = (delay) => new Promise(resolve => setTimeout(resolve, delay));
+
+const secondsToTimestamp = (totalSeconds) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor(totalSeconds % 3600 / 60);
+    const seconds = Math.floor(totalSeconds % 3600 % 60);
+
+    const hoursString = hours > 9 ? hours : `0${hours}`;
+    const minutesString = minutes > 9 ? minutes : `0${minutes}`;
+    const secondsString = seconds > 9 ? seconds : `0${seconds}`;
+
+    const minutesSecondsString = `${minutesString}:${secondsString}`
+
+    return hours ? `${hoursString}:${minutesSecondsString}` : minutesSecondsString;
+}
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=+!@#$%^&*();:,<.>/?';
 
@@ -17,6 +31,8 @@ term.loadAddon(new WebLinksAddon());
 
 const fitAddon = new FitAddon();
 term.loadAddon(fitAddon);
+
+const moveToColumn = (col) => term.write(`\x1b[${col}G`);
 
 const credentialMap = {
   dweaver: 'vinegar'
@@ -31,9 +47,9 @@ const audioMap = {
 }
 
 const klaxon = new Audio(require('./assets/klaxon.mp3'));
-klaxon.addEventListener('ended', function() {
-    this.currentTime = 0;
-    this.play();
+klaxon.addEventListener('ended', () => {
+  this.currentTime = 0;
+  this.play();
 }, false);
 
 let commandMap = {};
@@ -64,13 +80,14 @@ const buildCommandMap = (setImageName, setWindowOpen) => ({
         }
         return;
       }
+
       disableKeyStrokes();
       setImageName(fileName);
       setWindowOpen(true);
     }
   },
   play: {
-    func: (fileName) => {
+    func: async (fileName) => {
       if (!audioMap[fileName]) {
         if (!fileName) {
           term.writeln('Expected argument $fileName. Try \'help\' for more information.');
@@ -79,7 +96,23 @@ const buildCommandMap = (setImageName, setWindowOpen) => ({
         }
         return;
       }
-      new Audio(audioMap[fileName]).play();
+
+      await new Promise(resolve => {
+        const audio = new Audio(audioMap[fileName]);
+
+        audio.addEventListener('timeupdate', () => {
+          moveToColumn(0);
+          term.write(`${secondsToTimestamp(audio.currentTime)}/${secondsToTimestamp(audio.duration)}`);
+        }, false);
+
+        audio.addEventListener('ended', () => {
+          resolve();
+        }, false);
+
+        audio.play();
+      });
+
+      term.writeln('');
     }
   },
   fallback: {
@@ -157,7 +190,7 @@ const enablePasswordKeyStrokes = () => {
 
       if (command !== credentialMap[login]) {
         await waitFor(200);
-        term.write(`\x1b[0G`);
+        moveToColumn(0);
         term.writeln(`Invalid credentials. ${attempts} attempts remaining.`);
 
         if (!attempts) {
@@ -176,7 +209,7 @@ const enablePasswordKeyStrokes = () => {
           await typewriteString('Initiating drone strike in: ');
 
           for (let i = 10; i >= 0; i--) {
-            term.write(`\x1b[0G`);
+            moveToColumn(0);
             term.write(`Initiating drone strike in: ${i} `);
             await waitFor(1000);
           }
@@ -219,7 +252,7 @@ const enablePasswordKeyStrokes = () => {
         } else {
           const dots = i % 4;
 
-          term.write(`\x1b[0G`);
+          moveToColumn(0);
           term.write('Authenticating' + Array(dots).fill('.').join('') + Array(3 - dots).fill(' ').join(''));
         }
 
@@ -252,7 +285,7 @@ let keystrokeHandler;
 
 const enableKeyStrokes = () => {
   term.focus();
-  keystrokeHandler = term.onKey(({key, domEvent}) => {
+  keystrokeHandler = term.onKey(async ({key, domEvent}) => {
     const charCode = key.charCodeAt(0);
 
     if (charCode === 13) { // Enter
@@ -268,7 +301,7 @@ const enableKeyStrokes = () => {
       const args = line.split(' ').slice(1).filter(arg => !!arg);
 
       if (commandMap[command]) {
-        commandMap[command].func(...args)
+        await commandMap[command].func(...args)
       } else {
         commandMap.fallback.func()
       }
@@ -303,7 +336,7 @@ const runConnectionSequence = async () => {
     const indent = '                  ';
 
     for (let i = 0; i <= 20; i++) {
-      term.write(`\x1b[0G`);
+      moveToColumn(0);
       const loaderPrefix = 'Establishing secure connection... '
       const loader = `${Array(i).fill('=').join('')}${Array(20 - i).fill('-').join('')} ${i * 5}%`
 
@@ -362,7 +395,7 @@ function App() {
 
       opened = true;
     }
-  });
+  }, []);
 
   return (
     <>
