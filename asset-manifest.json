@@ -1,21 +1,22 @@
 {
   "files": {
-    "main.css": "/tabletop-terminal/static/css/main.f8862f00.css",
-    "main.js": "/tabletop-terminal/static/js/main.9bf5f2b0.js",
+    "main.css": "/tabletop-terminal/static/css/main.f9612fc5.css",
+    "main.js": "/tabletop-terminal/static/js/main.519ccd6a.js",
     "static/js/787.942201f0.chunk.js": "/tabletop-terminal/static/js/787.942201f0.chunk.js",
     "static/media/klaxon.mp3": "/tabletop-terminal/static/media/klaxon.2194f0c81f731a39c472.mp3",
+    "static/media/sample-12s.mp3": "/tabletop-terminal/static/media/sample-12s.4e544d25af8c78e6f94c.mp3",
     "static/media/t-rex-roar.mp3": "/tabletop-terminal/static/media/t-rex-roar.37424eef13efee311860.mp3",
     "static/media/ms_sans_serif.woff": "/tabletop-terminal/static/media/ms_sans_serif.aac84aa6de42b83d1a62.woff",
     "static/media/ms_sans_serif_bold.woff": "/tabletop-terminal/static/media/ms_sans_serif_bold.9fbe71248995f1c639d4.woff",
     "static/media/ms_sans_serif.woff2": "/tabletop-terminal/static/media/ms_sans_serif.0348082abb503fb6a8c2.woff2",
     "static/media/ms_sans_serif_bold.woff2": "/tabletop-terminal/static/media/ms_sans_serif_bold.7fcf57cc6e87ecddbf64.woff2",
     "index.html": "/tabletop-terminal/index.html",
-    "main.f8862f00.css.map": "/tabletop-terminal/static/css/main.f8862f00.css.map",
-    "main.9bf5f2b0.js.map": "/tabletop-terminal/static/js/main.9bf5f2b0.js.map",
+    "main.f9612fc5.css.map": "/tabletop-terminal/static/css/main.f9612fc5.css.map",
+    "main.519ccd6a.js.map": "/tabletop-terminal/static/js/main.519ccd6a.js.map",
     "787.942201f0.chunk.js.map": "/tabletop-terminal/static/js/787.942201f0.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f8862f00.css",
-    "static/js/main.9bf5f2b0.js"
+    "static/css/main.f9612fc5.css",
+    "static/js/main.519ccd6a.js"
   ]
 }
