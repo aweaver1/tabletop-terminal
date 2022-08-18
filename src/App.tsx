@@ -1,31 +1,30 @@
 import * as React from 'react';
 import Terminal from 'src/terminal/Terminal';
 import Window from 'src/window/Window';
+import { Image } from 'src/common/model';
 
 const App: React.FunctionComponent = () => {
   const [pauseKeystrokes, setPauseKeystrokes] = React.useState<boolean>(false);
-  const [imageName, setImageName] = React.useState<string | null>(null);
-  const [image, setImage] = React.useState<string | null>(null);
+  const [image, setImage] = React.useState<Image | null>(null);
 
   return (
     <>
       <Terminal
         pauseKeystrokes={pauseKeystrokes}
-        onOpenImage={(imageName, image) => {
-          setImageName(imageName);
+        onOpenImage={(image) => {
           setImage(image);
           setPauseKeystrokes(true);
         }}
       />
-      {imageName && image && (
+      {image && (
         <Window
-          title={imageName}
+          title={image.name}
           onClose={() => {
-            setImageName(null);
+            setImage(null);
             setPauseKeystrokes(false);
           }}
         >
-          <img src={image} />
+          <img src={image.src} />
         </Window>
       )}
     </>

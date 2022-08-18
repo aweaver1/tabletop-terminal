@@ -7,6 +7,8 @@ export const term = new XTerminal({
   cursorStyle: 'underline',
 });
 
+export default term;
+
 term.loadAddon(new WebLinksAddon());
 
 const fitAddon = new FitAddon();
@@ -16,6 +18,8 @@ term.loadAddon(fitAddon);
 export const initializeTerminal = (termRef: any) => {
   term.open(termRef.current);
   fitAddon.fit();
+  term.writeln('\x1B[32m');
+  term.focus();
 };
 
 export const lines = [''];
@@ -70,5 +74,3 @@ export const typewriteString = async (str: string, delay?: number) => {
     await waitFor(delay ? delay : 50);
   }
 };
-
-export default term;
