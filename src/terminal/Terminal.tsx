@@ -1,75 +1,25 @@
 import * as React from 'react';
 import 'xterm/css/xterm.css';
-import { Terminal as XTerminal } from 'xterm';
-import { WebLinksAddon } from 'xterm-addon-web-links';
-import { FitAddon } from 'xterm-addon-fit';
 import Constants from 'src/common/constants';
 import { waitFor, secondsToTimestamp } from 'src/common/util';
 import KlaxonAudio from 'src/assets/klaxon.mp3';
 import TrexAudio from 'src/assets/t-rex-roar.mp3';
 import Sample12s from 'src/assets/sample-12s.mp3';
 import ReactImage from 'src/assets/react.png';
-
-const term = new XTerminal({
-  cursorStyle: 'underline',
-});
-
-term.loadAddon(new WebLinksAddon());
-
-const fitAddon = new FitAddon();
-term.loadAddon(fitAddon);
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const initializeTerminal = (termRef: any) => {
-  term.open(termRef.current);
-  fitAddon.fit();
-};
-
-const lines = [''];
-
-const getCurrentLine = () => lines[lines.length - 1];
-const setCurrentLine = (str: string) => (lines[lines.length - 1] = str);
-const appendToCurrentLine = (str: string) =>
-  setCurrentLine(getCurrentLine() + str);
-
-const moveCursorHome = () => term.write('\x1b[H');
-const moveCursorTo = (col: number) => term.write(`\x1b[${col}G`);
-const moveCursorBack = (cols: number) => term.write(`\x1b[${cols}D`);
-
-const writeLines = (num: number) =>
-  Array(num)
-    .fill(null)
-    .forEach(() => term.writeln(''));
-
-const handleFileNotFound = (fileName: string) => {
-  if (!fileName) {
-    term.writeln(
-      "Expected argument $fileName. Try 'help' for more information."
-    );
-  } else {
-    term.writeln(`File ${fileName} not found.`);
-  }
-};
-
-const writeLoader = (ratio: number, suffix = '', offset = 0) => {
-  const pips = 20;
-  const progress = Math.ceil(ratio * pips);
-
-  const loader =
-    Array(progress).fill('=').join('') +
-    Array(pips - progress)
-      .fill('-')
-      .join('');
-
-  moveCursorTo(offset);
-
-  term.write(loader);
-
-  if (suffix) {
-    term.write(' ');
-    term.write(suffix);
-  }
-};
+import term, {
+  writeLines,
+  handleFileNotFound,
+  moveCursorTo,
+  writeLoader,
+  getCurrentLine,
+  lines,
+  moveCursorHome,
+  setCurrentLine,
+  moveCursorBack,
+  appendToCurrentLine,
+  initializeTerminal,
+  typewriteString,
+} from './term';
 
 const credentialMap = {
   dweaver: 'vinegar',
@@ -191,13 +141,6 @@ const buildCommandMap = (
 
 let login = 'redacted';
 let commandPrefix = 'redacted@redacted:~$ ';
-
-const typewriteString = async (str: string, delay?: number) => {
-  for (const char of str.split('')) {
-    term.write(char);
-    await waitFor(delay ? delay : 50);
-  }
-};
 
 const enableLoginKeystrokes = () => {
   term.write('login: ');
