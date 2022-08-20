@@ -3,7 +3,7 @@ import 'src/glitch/Glitch.css';
 
 export type GlitchProps = {
   enabled: boolean;
-  children: (React.ReactElement | null)[];
+  children: (JSX.Element | null)[];
 };
 
 const Glitch: React.FunctionComponent<GlitchProps> = (props) => {

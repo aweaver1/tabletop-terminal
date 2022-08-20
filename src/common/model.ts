@@ -20,6 +20,6 @@ export type FileType = 'image' | 'audio';
 
 export type AudioName = 't-rex-roar.mp3' | 'sample-12s.mp3';
 
-export type ImageName = 'react.png';
+export type ImageName = 'react.png' | 'puppy.jpg';
 
 export type FileName = AudioName | ImageName;

@@ -7,29 +7,39 @@ import { Image } from 'src/common/model';
 const App: React.FunctionComponent = () => {
   const [glitchEnabled, setGlitchEnabled] = React.useState<boolean>(false);
   const [pauseKeystrokes, setPauseKeystrokes] = React.useState<boolean>(false);
-  const [image, setImage] = React.useState<Image | null>(null);
+  const [images, setImages] = React.useState<Image[]>([]);
 
   return (
     <Glitch enabled={glitchEnabled}>
       <Terminal
         pauseKeystrokes={pauseKeystrokes}
         onUnauthorizedAccess={() => setGlitchEnabled(true)}
-        onOpenImage={(image) => {
-          setImage(image);
-          setPauseKeystrokes(true);
+        onOpenImage={(newImage) => {
+          setImages((prev) =>
+            prev.find((existingImage) => existingImage.name === newImage.name)
+              ? [...prev]
+              : [...prev, newImage]
+          );
         }}
       />
-      {image && (
-        <Window
-          title={image.name}
-          onClose={() => {
-            setImage(null);
-            setPauseKeystrokes(false);
-          }}
-        >
-          <img src={image.src} />
-        </Window>
-      )}
+      <>
+        {images.map(
+          (image, index): React.ReactElement => (
+            <Window
+              key={image.name}
+              title={image.name}
+              onClose={() => {
+                setImages((prev) => prev.filter((item, i) => i !== index));
+              }}
+            >
+              <img
+                src={image.src}
+                style={{ maxHeight: '300px', maxWidth: '300px' }}
+              />
+            </Window>
+          )
+        )}
+      </>
     </Glitch>
   );
 };

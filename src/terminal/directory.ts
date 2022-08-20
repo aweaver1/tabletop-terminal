@@ -2,6 +2,7 @@ import Constants from 'src/common/constants';
 import term from 'src/terminal/term';
 import { Folder, File, FolderName, FolderOrFileName } from 'src/common/model';
 import ReactImage from 'src/assets/react.png';
+import PuppyImage from 'src/assets/puppy.jpg';
 import TrexRoarAudio from 'src/assets/t-rex-roar.mp3';
 import Sample12sAudio from 'src/assets/sample-12s.mp3';
 
@@ -11,6 +12,11 @@ const directories: Folder = {
       'react.png': {
         name: 'react.png',
         src: ReactImage,
+        type: 'image',
+      },
+      'puppy.jpg': {
+        name: 'puppy.jpg',
+        src: PuppyImage,
         type: 'image',
       },
     },
@@ -39,6 +45,8 @@ export const setCurrentPath = (pathString: string) => {
 
   if (directory) {
     currentPath = newPath as FolderName[];
+  } else {
+    term.writeln(`Directory '/${newPath.join('/')}' not found.`);
   }
 };
 
