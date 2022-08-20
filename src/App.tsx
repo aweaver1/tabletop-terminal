@@ -6,13 +6,12 @@ import { Image } from 'src/common/model';
 
 const App: React.FunctionComponent = () => {
   const [glitchEnabled, setGlitchEnabled] = React.useState<boolean>(false);
-  const [pauseKeystrokes, setPauseKeystrokes] = React.useState<boolean>(false);
   const [images, setImages] = React.useState<Image[]>([]);
 
   return (
     <Glitch enabled={glitchEnabled}>
       <Terminal
-        pauseKeystrokes={pauseKeystrokes}
+        pauseKeystrokes={false}
         onUnauthorizedAccess={() => setGlitchEnabled(true)}
         onOpenImage={(newImage) => {
           setImages((prev) =>
