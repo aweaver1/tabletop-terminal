@@ -4,7 +4,6 @@ import Constants from 'src/common/constants';
 import { secondsToTimestamp } from 'src/common/util';
 import term, {
   writeLines,
-  handleFileNotFound,
   moveCursorTo,
   writeLoader,
   initializeTerminal,
@@ -16,8 +15,7 @@ import {
   enableLogin,
   enablePassword,
 } from 'src/terminal/sequences';
-import { imageMap, audioMap } from 'src/common/assets';
-import { listDirectoryContents, setCurrentPath } from './directory';
+import { getFile, listDirectoryContents, setCurrentPath } from './directory';
 
 export type Command = {
   func: (...args: string[]) => void;
@@ -46,74 +44,93 @@ const buildCommandMap = (onOpenImage: (image: Image) => void) => {
       },
     },
     list: {
-      description: 'List all contents of the current directory.',
+      description:
+        "List all contents of a directory at a given path (e.g., 'list', 'list files', 'list /files/audio', 'list ..').",
       func: (path?: string) => {
         listDirectoryContents(path);
       },
     },
     view: {
       description:
-        'View an image file in the current directory (e.g., view myimage.png).',
-      func: (fileName: string) => {
-        if (!imageMap[fileName]) {
-          handleFileNotFound(fileName);
-          return;
-        }
-
-        onOpenImage({ name: fileName, src: imageMap[fileName] });
-      },
-    },
-    open: {
-      description:
-        'Open a directory (e.g., open files, open /files/images, open .., open ~).',
-      func: (path?: string) => {
-        if (!path) {
+        "View an image file in a given directory (e.g., 'view myimage.png', 'view /files/images/myimage.png').",
+      func: (pathString?: string) => {
+        if (!pathString) {
           term.writeln(
             "Expected argument $path. Try 'help' for more information."
           );
         } else {
-          setCurrentPath(path);
+          const file = getFile(pathString);
+
+          if (file) {
+            if (file.type !== 'image') {
+              term.writeln('Cannot view image, invalid file format.');
+            } else {
+              onOpenImage({ ...file } as Image);
+            }
+          }
+        }
+      },
+    },
+    open: {
+      description:
+        "Open a directory at a given path (e.g., 'open files', 'open /files/images', 'open ..', 'open ~').",
+      func: (pathString?: string) => {
+        if (!pathString) {
+          term.writeln(
+            "Expected argument $path. Try 'help' for more information."
+          );
+        } else {
+          setCurrentPath(pathString);
         }
       },
     },
     play: {
       description:
-        'Play an audio file in the current directory (e.g., play myaudio.mp3).',
-      func: async (fileName: string) => {
-        if (!audioMap[fileName]) {
-          handleFileNotFound(fileName);
-          return;
+        "Play an audio file in a given directory (e.g., 'play myaudio.mp3', 'play /files/audio/myaudio.mp3').",
+      func: async (pathString?: string) => {
+        if (!pathString) {
+          term.writeln(
+            "Expected argument $path. Try 'help' for more information."
+          );
+        } else {
+          const file = getFile(pathString);
+
+          if (file) {
+            if (file.type !== 'audio') {
+              term.writeln('Cannot play audio, invalid file format.');
+            } else {
+              await new Promise<void>((resolve) => {
+                const audio = new Audio(file.src);
+
+                audio.addEventListener(
+                  'timeupdate',
+                  () => {
+                    moveCursorTo(0);
+                    writeLoader(
+                      audio.currentTime / audio.duration,
+                      `${secondsToTimestamp(
+                        audio.currentTime
+                      )}/${secondsToTimestamp(audio.duration)}`
+                    );
+                  },
+                  false
+                );
+
+                audio.addEventListener(
+                  'ended',
+                  () => {
+                    resolve();
+                  },
+                  false
+                );
+
+                audio.play();
+              });
+
+              writeLines(1);
+            }
+          }
         }
-
-        await new Promise<void>((resolve) => {
-          const audio = new Audio(audioMap[fileName]);
-
-          audio.addEventListener(
-            'timeupdate',
-            () => {
-              moveCursorTo(0);
-              writeLoader(
-                audio.currentTime / audio.duration,
-                `${secondsToTimestamp(audio.currentTime)}/${secondsToTimestamp(
-                  audio.duration
-                )}`
-              );
-            },
-            false
-          );
-
-          audio.addEventListener(
-            'ended',
-            () => {
-              resolve();
-            },
-            false
-          );
-
-          audio.play();
-        });
-
-        writeLines(1);
       },
     },
     exit: {

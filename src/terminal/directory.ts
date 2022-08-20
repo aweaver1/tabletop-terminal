@@ -1,21 +1,30 @@
-import { FileName } from 'src/common/assets';
 import Constants from 'src/common/constants';
-import term from './term';
-
-export type FolderName = 'files' | 'images' | 'audio';
-
-export type Folder = {
-  [name in FolderName | FileName]?: Folder | null;
-};
+import term from 'src/terminal/term';
+import { Folder, File, FolderName, FolderOrFileName } from 'src/common/model';
+import ReactImage from 'src/assets/react.png';
+import TrexRoarAudio from 'src/assets/t-rex-roar.mp3';
+import Sample12sAudio from 'src/assets/sample-12s.mp3';
 
 const directories: Folder = {
   files: {
     images: {
-      'react.png': null,
+      'react.png': {
+        name: 'react.png',
+        src: ReactImage,
+        type: 'image',
+      },
     },
     audio: {
-      't-rex-roar.mp3': null,
-      'sample-12s.mp3': null,
+      't-rex-roar.mp3': {
+        name: 't-rex-roar.mp3',
+        src: TrexRoarAudio,
+        type: 'audio',
+      },
+      'sample-12s.mp3': {
+        name: 'sample-12s.mp3',
+        src: Sample12sAudio,
+        type: 'audio',
+      },
     },
   },
 };
@@ -24,37 +33,40 @@ let currentPath: FolderName[] = [];
 
 export const getCurrentPath = () => currentPath;
 
-export const setCurrentPath = (path: string) => {
-  const newPath = buildPath(path);
+export const setCurrentPath = (pathString: string) => {
+  const newPath = buildPath(pathString);
+  const directory = getFolder(newPath);
 
-  if (getDirectory(newPath)) {
-    currentPath = newPath;
-  } else {
-    term.writeln(`Directory ${path} not found.`);
+  if (directory) {
+    currentPath = newPath as FolderName[];
   }
 };
 
 export const formatCurrentPath = () =>
   currentPath.length ? '/' + getCurrentPath().join('/') : '';
 
-export const listDirectoryContents = (path?: string) => {
-  const directory = getDirectory(path ? buildPath(path) : currentPath);
+export const listDirectoryContents = (pathString?: string) => {
+  const path = pathString ? buildPath(pathString) : currentPath;
 
-  if (!directory) {
-    term.writeln(`Directory ${path} not found.`);
-  } else {
+  const directory = getFolder(path);
+
+  if (directory) {
     [...Object.keys(directory)]
       .sort()
       .forEach((key) =>
-        term.writeln(`${Constants.INDENT}${key}${directory[key] ? '/' : ''}`)
+        term.writeln(
+          `${Constants.INDENT}${key}${isDirectory(directory[key]) ? '/' : ''}`
+        )
       );
+  } else {
+    term.writeln(`Directory '/${path.join('/')}' not found.`);
   }
 };
 
-const buildPath = (path: string): FolderName[] => {
-  const folders = path.replace('~', '/').split('/');
+const buildPath = (pathString: string): FolderOrFileName[] => {
+  const folders = pathString.split('/');
 
-  if (!folders[0]) {
+  if (!folders[0] || folders[0] === '~') {
     folders.shift();
   } else {
     folders.unshift(...getCurrentPath());
@@ -68,11 +80,34 @@ const buildPath = (path: string): FolderName[] => {
     folders.splice(folders.indexOf('..') - 1, 2);
   }
 
-  return folders as FolderName[];
+  return folders as FolderOrFileName[];
 };
 
-const getDirectory = (path: FolderName[]) => {
-  return path.reduce((prev, curr) => {
-    return prev ? prev[curr] : null;
-  }, directories);
+const getFolderOrFile = (path: FolderOrFileName[]): Folder | File | null => {
+  return (
+    path.reduce((prev, curr) => {
+      return prev ? prev[curr] : null;
+    }, directories) || null
+  );
+};
+
+const isDirectory = (folderOrFile: Folder | File | null): boolean =>
+  !!folderOrFile && !Object.prototype.hasOwnProperty.call(folderOrFile, 'type');
+
+const getFolder = (path: FolderOrFileName[]): Folder | null => {
+  const folderOrFile = getFolderOrFile(path);
+  return isDirectory(folderOrFile) ? (folderOrFile as Folder) : null;
+};
+
+export const getFile = (pathString: string): File | null => {
+  const path = buildPath(pathString);
+  const folderOrFile = getFolderOrFile(path);
+
+  const file = !isDirectory(folderOrFile) ? (folderOrFile as File) : null;
+
+  if (!file) {
+    term.writeln(`File '/${path.join('/')}' not found.`);
+  }
+
+  return file;
 };

@@ -38,16 +38,6 @@ export const writeLines = (num: number) =>
     .fill(null)
     .forEach(() => term.writeln(''));
 
-export const handleFileNotFound = (fileName: string) => {
-  if (!fileName) {
-    term.writeln(
-      "Expected argument $fileName. Try 'help' for more information."
-    );
-  } else {
-    term.writeln(`File ${fileName} not found.`);
-  }
-};
-
 export const writeLoader = (ratio: number, suffix = '', offset = 0) => {
   const pips = 20;
   const progress = Math.ceil(ratio * pips);
