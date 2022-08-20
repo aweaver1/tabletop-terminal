@@ -15,7 +15,8 @@ import term, {
   typewriteString,
 } from './term';
 import { IDisposable } from 'xterm';
-import { CommandMap } from 'src/common/model';
+import { formatCurrentPath } from './directory';
+import { CommandMap } from './Terminal';
 
 const credentialMap = {
   dweaver: 'vinegar',
@@ -32,7 +33,8 @@ klaxon.addEventListener(
 );
 
 let login = 'redacted';
-let commandPrefix = 'redacted@redacted:~$ ';
+
+const getCommandPrefix = () => `${login}@redacted:~${formatCurrentPath()}$ `;
 
 let keystrokeHandler: IDisposable;
 
@@ -60,7 +62,6 @@ export const enableLogin = () =>
           disposeKeystrokeHandler();
 
           login = command;
-          commandPrefix = `${command}@redacted:~$ `;
 
           writeLines(1);
           lines.push('');
@@ -215,7 +216,7 @@ const runConnectionSequence = async () => {
       `${Math.ceil((i / 20) * 100)}%`,
       loaderPrefix.length + 1
     );
-    await waitFor(500);
+    await waitFor(300);
   }
 
   writeLines(2);
@@ -242,7 +243,7 @@ const runConnectionSequence = async () => {
   await waitFor(500);
 
   writeLines(1);
-  term.write(commandPrefix);
+  term.write(getCommandPrefix());
 };
 
 let keystrokesDisabled = false;
@@ -281,7 +282,7 @@ export const enableCommands = (commandMap: CommandMap) => {
           commandMap.fallback.func();
         }
 
-        term.write(commandPrefix);
+        term.write(getCommandPrefix());
       } else if (charCode === 127) {
         handleBackspace();
       } else {

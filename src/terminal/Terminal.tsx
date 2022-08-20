@@ -2,31 +2,30 @@ import * as React from 'react';
 import 'xterm/css/xterm.css';
 import Constants from 'src/common/constants';
 import { secondsToTimestamp } from 'src/common/util';
-import TrexAudio from 'src/assets/t-rex-roar.mp3';
-import Sample12s from 'src/assets/sample-12s.mp3';
-import ReactImage from 'src/assets/react.png';
 import term, {
   writeLines,
   handleFileNotFound,
   moveCursorTo,
   writeLoader,
   initializeTerminal,
-} from './term';
-import { CommandMap, Image } from 'src/common/model';
+} from 'src/terminal/term';
+import { Image } from 'src/common/model';
 import {
   disableKeystrokes,
   enableCommands,
   enableLogin,
   enablePassword,
-} from './sequences';
+} from 'src/terminal/sequences';
+import { imageMap, audioMap } from 'src/common/assets';
+import { listDirectoryContents, setCurrentPath } from './directory';
 
-const imageMap = {
-  'react.png': ReactImage,
+export type Command = {
+  func: (...args: string[]) => void;
+  description?: string;
 };
 
-const audioMap = {
-  't-rex-roar.mp3': TrexAudio,
-  'sample-12s.mp3': Sample12s,
+export type CommandMap = {
+  [commandName: string]: Command;
 };
 
 let commandMap: CommandMap = {};
@@ -47,11 +46,9 @@ const buildCommandMap = (onOpenImage: (image: Image) => void) => {
       },
     },
     list: {
-      description: 'List all files in the current directory.',
-      func: () => {
-        [...Object.keys(imageMap), ...Object.keys(audioMap)].forEach((key) =>
-          term.writeln(`${Constants.INDENT}${key}`)
-        );
+      description: 'List all contents of the current directory.',
+      func: (path?: string) => {
+        listDirectoryContents(path);
       },
     },
     view: {
@@ -64,6 +61,19 @@ const buildCommandMap = (onOpenImage: (image: Image) => void) => {
         }
 
         onOpenImage({ name: fileName, src: imageMap[fileName] });
+      },
+    },
+    open: {
+      description:
+        'Open a directory (e.g., open files, open /files/images, open .., open ~).',
+      func: (path?: string) => {
+        if (!path) {
+          term.writeln(
+            "Expected argument $path. Try 'help' for more information."
+          );
+        } else {
+          setCurrentPath(path);
+        }
       },
     },
     play: {
@@ -105,6 +115,10 @@ const buildCommandMap = (onOpenImage: (image: Image) => void) => {
 
         writeLines(1);
       },
+    },
+    exit: {
+      description: 'Exit the current session, logging you out.',
+      func: () => window.location.reload(),
     },
     fallback: {
       func: () =>
