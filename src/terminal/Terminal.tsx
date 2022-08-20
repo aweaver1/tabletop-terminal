@@ -150,11 +150,12 @@ let initialized = false;
 
 export type TerminalProps = {
   pauseKeystrokes: boolean;
+  onUnauthorizedAccess: () => void;
   onOpenImage: (image: Image) => void;
 };
 
 const Terminal: React.FunctionComponent<TerminalProps> = (props) => {
-  const { pauseKeystrokes, onOpenImage } = props;
+  const { pauseKeystrokes, onUnauthorizedAccess, onOpenImage } = props;
 
   const termRef = React.useRef(null);
 
@@ -168,7 +169,7 @@ const Terminal: React.FunctionComponent<TerminalProps> = (props) => {
 
       (async () => {
         if ((await enableLogin()) !== 'bypass') {
-          await enablePassword();
+          await enablePassword(onUnauthorizedAccess);
         }
 
         enableCommands(buildCommandMap(onOpenImage));

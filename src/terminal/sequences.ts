@@ -76,7 +76,7 @@ export const enableLogin = () =>
     );
   });
 
-export const enablePassword = async () =>
+export const enablePassword = async (onUnauthorizedAccess: () => void) =>
   new Promise<void>((resolve) => {
     term.write(Constants.PASSWORD_PREFIX);
     term.focus();
@@ -103,6 +103,8 @@ export const enablePassword = async () =>
               disposeKeystrokeHandler();
 
               await waitFor(1000);
+
+              setTimeout(() => onUnauthorizedAccess(), 3000);
               await runUnauthorizedAccessSequence();
             } else {
               await waitFor(100);
