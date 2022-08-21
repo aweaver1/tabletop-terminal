@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/tabletop-terminal/static/css/main.a6f0c497.css",
-    "main.js": "/tabletop-terminal/static/js/main.0bab61e8.js",
+    "main.js": "/tabletop-terminal/static/js/main.77d32819.js",
     "static/js/787.942201f0.chunk.js": "/tabletop-terminal/static/js/787.942201f0.chunk.js",
     "static/media/klaxon.mp3": "/tabletop-terminal/static/media/klaxon.2194f0c81f731a39c472.mp3",
     "static/media/puppy.jpg": "/tabletop-terminal/static/media/puppy.12b59488eff9a63171f7.jpg",
@@ -13,11 +13,11 @@
     "static/media/ms_sans_serif_bold.woff2": "/tabletop-terminal/static/media/ms_sans_serif_bold.7fcf57cc6e87ecddbf64.woff2",
     "index.html": "/tabletop-terminal/index.html",
     "main.a6f0c497.css.map": "/tabletop-terminal/static/css/main.a6f0c497.css.map",
-    "main.0bab61e8.js.map": "/tabletop-terminal/static/js/main.0bab61e8.js.map",
+    "main.77d32819.js.map": "/tabletop-terminal/static/js/main.77d32819.js.map",
     "787.942201f0.chunk.js.map": "/tabletop-terminal/static/js/787.942201f0.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a6f0c497.css",
-    "static/js/main.0bab61e8.js"
+    "static/js/main.77d32819.js"
   ]
 }
