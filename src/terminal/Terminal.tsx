@@ -133,6 +133,23 @@ const buildCommandMap = (onOpenImage: (image: Image) => void) => {
         }
       },
     },
+    map: {
+      description:
+        'Maps the provided address by generating a link (e.g., \'map "1600 Pennsylvania Ave NW"\').',
+      func: (addressString?: string) => {
+        if (!addressString) {
+          term.writeln(
+            "Expected argument $address. Try 'help' for more information."
+          );
+        } else {
+          term.writeln(
+            `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              addressString
+            )}`
+          );
+        }
+      },
+    },
     exit: {
       description: 'Exit the current session, logging you out.',
       func: () => window.location.reload(),

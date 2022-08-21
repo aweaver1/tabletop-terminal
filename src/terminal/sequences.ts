@@ -273,10 +273,14 @@ export const enableCommands = (commandMap: CommandMap) => {
         }
 
         const command = line.split(' ')[0];
-        const args = line
-          .split(' ')
-          .slice(1)
-          .filter((arg) => !!arg);
+        // TODO: Make this more generic
+        const args =
+          line.split('"').length === 3
+            ? [line.split('"')[1]]
+            : line
+                .split(' ')
+                .slice(1)
+                .filter((arg) => !!arg);
 
         if (commandMap[command]) {
           await commandMap[command].func(...args);
