@@ -3,9 +3,12 @@ import * as ReactDOM from 'react-dom/client';
 import './index.css';
 import App from 'src/App';
 import reportWebVitals from 'src/report-web-vitals';
+import isMobile from 'is-mobile';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const root = ReactDOM.createRoot(document.getElementById('root')!);
+
+alert(`Is mobile? ${isMobile()}`);
 
 root.render(
   <React.StrictMode>
