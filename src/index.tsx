@@ -8,13 +8,15 @@ import isMobile from 'is-mobile';
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
-alert(`Is mobile? ${isMobile()}`);
+const isMobileDevice = isMobile();
 
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+if (isMobileDevice) {
+  alert(
+    'WARNING: Insecure connection detected. Please use a desktop device. Your mobile provider is listening.'
+  );
+}
+
+root.render(<React.StrictMode>{!isMobileDevice && <App />}</React.StrictMode>);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
