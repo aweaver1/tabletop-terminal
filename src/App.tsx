@@ -12,7 +12,7 @@ const App: React.FunctionComponent = () => {
     <Glitch enabled={glitchEnabled}>
       <Terminal
         pauseKeystrokes={false}
-        onUnauthorizedAccess={() => setGlitchEnabled(true)}
+        onEnableGlitch={(enabled) => setGlitchEnabled(enabled)}
         onOpenImage={(newImage) => {
           setImages((prev) =>
             prev.find((existingImage) => existingImage.name === newImage.name)

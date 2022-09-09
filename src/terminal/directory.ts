@@ -1,34 +1,14 @@
 import Constants from 'src/common/constants';
 import term from 'src/terminal/term';
 import { Folder, File, FolderName, FolderOrFileName } from 'src/common/model';
-import ReactImage from 'src/assets/react.png';
-import PuppyImage from 'src/assets/puppy.jpg';
-import TrexRoarAudio from 'src/assets/t-rex-roar.mp3';
-import Sample12sAudio from 'src/assets/sample-12s.mp3';
+import BriefingAudio from 'src/assets/briefing.m4a';
 
 const directories: Folder = {
-  files: {
-    images: {
-      'react.png': {
-        name: 'react.png',
-        src: ReactImage,
-        type: 'image',
-      },
-      'puppy.jpg': {
-        name: 'puppy.jpg',
-        src: PuppyImage,
-        type: 'image',
-      },
-    },
-    audio: {
-      't-rex-roar.mp3': {
-        name: 't-rex-roar.mp3',
-        src: TrexRoarAudio,
-        type: 'audio',
-      },
-      'sample-12s.mp3': {
-        name: 'sample-12s.mp3',
-        src: Sample12sAudio,
+  operations: {
+    iago: {
+      'briefing.mp3': {
+        name: 'briefing.mp3',
+        src: BriefingAudio,
         type: 'audio',
       },
     },

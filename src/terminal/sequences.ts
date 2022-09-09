@@ -19,7 +19,9 @@ import { formatCurrentPath } from './directory';
 import { CommandMap } from './Terminal';
 
 const credentialMap = {
-  dweaver: 'vinegar',
+  vvinegar: 'dolores',
+  dgordon: 'opint',
+  rmasamune: 'dagger',
 };
 
 const klaxon = new Audio(KlaxonAudio);
@@ -76,7 +78,9 @@ export const enableLogin = () =>
     );
   });
 
-export const enablePassword = async (onUnauthorizedAccess: () => void) =>
+export const enablePassword = async (
+  onEnableGlitch: (enabled: boolean) => void
+) =>
   new Promise<void>((resolve) => {
     term.write(Constants.PASSWORD_PREFIX);
     term.focus();
@@ -104,7 +108,7 @@ export const enablePassword = async (onUnauthorizedAccess: () => void) =>
 
               await waitFor(1000);
 
-              setTimeout(() => onUnauthorizedAccess(), 3000);
+              setTimeout(() => onEnableGlitch(true), 3000);
               await runUnauthorizedAccessSequence();
             } else {
               await waitFor(100);

@@ -28,7 +28,10 @@ export type CommandMap = {
 
 let commandMap: CommandMap = {};
 
-const buildCommandMap = (onOpenImage: (image: Image) => void) => {
+const buildCommandMap = (
+  onOpenImage: (image: Image) => void,
+  onEnableGlitch: (enabled: boolean) => void
+) => {
   commandMap = {
     '': {
       func: () => writeLines(1),
@@ -100,6 +103,11 @@ const buildCommandMap = (onOpenImage: (image: Image) => void) => {
               term.writeln('Cannot play audio, invalid file format.');
             } else {
               await new Promise<void>((resolve) => {
+                if (file.name === 'briefing.mp3') {
+                  setTimeout(() => onEnableGlitch(true), 30000);
+                  setTimeout(() => onEnableGlitch(false), 40000);
+                }
+
                 const audio = new Audio(file.src);
 
                 audio.addEventListener(
@@ -167,12 +175,12 @@ let initialized = false;
 
 export type TerminalProps = {
   pauseKeystrokes: boolean;
-  onUnauthorizedAccess: () => void;
+  onEnableGlitch: (enabled: boolean) => void;
   onOpenImage: (image: Image) => void;
 };
 
 const Terminal: React.FunctionComponent<TerminalProps> = (props) => {
-  const { pauseKeystrokes, onUnauthorizedAccess, onOpenImage } = props;
+  const { pauseKeystrokes, onEnableGlitch, onOpenImage } = props;
 
   const termRef = React.useRef(null);
 
@@ -180,16 +188,16 @@ const Terminal: React.FunctionComponent<TerminalProps> = (props) => {
     if (!initialized && termRef.current) {
       initialized = true;
 
-      buildCommandMap(props.onOpenImage);
+      buildCommandMap(onOpenImage, onEnableGlitch);
 
       initializeTerminal(termRef);
 
       (async () => {
         if ((await enableLogin()) !== 'bypass') {
-          await enablePassword(onUnauthorizedAccess);
+          await enablePassword(onEnableGlitch);
         }
 
-        enableCommands(buildCommandMap(onOpenImage));
+        enableCommands(buildCommandMap(onOpenImage, onEnableGlitch));
       })();
     }
   }, []);
