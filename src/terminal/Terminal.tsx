@@ -20,6 +20,8 @@ import { getFile, listDirectoryContents, setCurrentPath } from './directory';
 export type Command = {
   func: (...args: string[]) => void;
   description?: string;
+  examples?: string[];
+  hidden?: boolean;
 };
 
 export type CommandMap = {
@@ -34,28 +36,50 @@ const buildCommandMap = (
 ) => {
   commandMap = {
     '': {
-      func: () => writeLines(1),
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      func: () => {},
     },
     help: {
+      description: 'Prints all available commands with example usages.',
       func: () => {
         Object.entries(commandMap)
-          .map(([commandName, command]) => [commandName, command.description])
-          .filter(([, description]) => !!description)
-          .forEach(([commandName, description]) => {
-            term.writeln(`${Constants.INDENT}${commandName}: ${description}`);
+          .filter(([, command]) => !!command.description && !command.hidden)
+          .forEach(([commandName, command]) => {
+            term.writeln(
+              `${Constants.INDENT}${commandName}: ${command.description}`
+            );
+            if (command.examples) {
+              command.examples.forEach((example) =>
+                term.writeln(`${Constants.INDENT}${Constants.INDENT}${example}`)
+              );
+            }
+            writeLines(1);
           });
       },
     },
-    list: {
-      description:
-        "List all contents of a directory at a given path (e.g., 'list', 'list files', 'list /files/audio', 'list ..').",
+    ls: {
+      description: 'List all contents of a directory at a given path.',
+      examples: [
+        "'ls' lists all entries in current directory.",
+        // TODO: Uncomment me
+        // "'ls files' lists all entries in a directory called 'files' within current directory.",
+        // "'ls files/audio' lists all entries in a directory called 'audio' within 'files' within current directory.",
+        // "'ls /files/audio' lists all entries in a directory called 'audio' within 'files' from root (denoted by leading '/').",
+        // "'ls ..' lists all entries in previous directory.",
+        // "'ls /' lists all entries in root directory.",
+      ],
       func: (path?: string) => {
         listDirectoryContents(path);
       },
     },
     view: {
-      description:
-        "View an image file in a given directory (e.g., 'view myimage.png', 'view /files/images/myimage.png').",
+      description: 'View an image file at a given path.',
+      examples: [
+        "'view house.png' opens an image called 'house.png' in current directory'",
+        // TODO: Uncomment me
+        // "'view files/image.png' opens an image called 'image.png' within a directory called 'files' within current directory.",
+        // "'view /files/image.png' opens an image called 'image.png' within a directory called 'files' from root (denoted by leading '/').",
+      ],
       func: (pathString?: string) => {
         if (!pathString) {
           term.writeln(
@@ -74,9 +98,15 @@ const buildCommandMap = (
         }
       },
     },
-    open: {
-      description:
-        "Open a directory at a given path (e.g., 'open files', 'open /files/images', 'open ..', 'open ~').",
+    cd: {
+      description: 'Change current working directory to given path.',
+      examples: [
+        "'cd operations' opens a directory called 'operations' in the current directory.",
+        "'cd operations/iago' opens directory 'iago' within 'operations' from current directory",
+        "'cd /operations/iago' opens directory 'iago' within 'operations' from root (denoted by leading '/')",
+        "'cd ..' opens previous directory.",
+        "'cd /' opens root directory.",
+      ],
       func: (pathString?: string) => {
         if (!pathString) {
           term.writeln(
@@ -86,10 +116,16 @@ const buildCommandMap = (
           setCurrentPath(pathString);
         }
       },
+      hidden: true,
     },
     play: {
-      description:
-        "Play an audio file in a given directory (e.g., 'play myaudio.mp3', 'play /files/audio/myaudio.mp3').",
+      description: 'Play an audio file at a given path.',
+      examples: [
+        "'play briefing.mp3' plays an audio file called 'briefing.mp3' within current directory.",
+        // TODO: Uncomment me
+        // "'play files/briefing.mp3' plays an audio file called 'briefing.mp3' within a directory called 'files' within current directory.",
+        // "'play /files/briefing.mp3' plays an audio file called 'briefing.mp3' within a directory called 'files' from root (denoted by leading '/').",
+      ],
       func: async (pathString?: string) => {
         if (!pathString) {
           term.writeln(
@@ -142,8 +178,8 @@ const buildCommandMap = (
       },
     },
     map: {
-      description:
-        'Maps the provided address by generating a link (e.g., \'map "1600 Pennsylvania Ave NW"\').',
+      description: 'Maps the provided address by generating a link.',
+      examples: ['\'map "1600 Pennsylvania Ave NW"\''],
       func: (addressString?: string) => {
         if (!addressString) {
           term.writeln(
@@ -157,6 +193,7 @@ const buildCommandMap = (
           );
         }
       },
+      hidden: true,
     },
     exit: {
       description: 'Exit the current session, logging you out.',

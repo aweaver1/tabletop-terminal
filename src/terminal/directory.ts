@@ -2,16 +2,28 @@ import Constants from 'src/common/constants';
 import term from 'src/terminal/term';
 import { Folder, File, FolderName, FolderOrFileName } from 'src/common/model';
 import BriefingAudio from 'src/assets/briefing.m4a';
+import HouseImage from 'src/assets/house.png';
 
 const directories: Folder = {
-  operations: {
-    iago: {
-      'briefing.mp3': {
-        name: 'briefing.mp3',
-        src: BriefingAudio,
-        type: 'audio',
-      },
-    },
+  // TODO: Uncomment me
+  // operations: {
+  //   iago: {
+  //     'briefing.mp3': {
+  //       name: 'briefing.mp3',
+  //       src: BriefingAudio,
+  //       type: 'audio',
+  //     },
+  //   },
+  // },
+  'briefing.mp3': {
+    name: 'briefing.mp3',
+    src: BriefingAudio,
+    type: 'audio',
+  },
+  'house.png': {
+    name: 'house.png',
+    src: HouseImage,
+    type: 'image',
   },
 };
 

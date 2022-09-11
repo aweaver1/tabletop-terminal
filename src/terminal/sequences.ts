@@ -25,14 +25,6 @@ const credentialMap = {
 };
 
 const klaxon = new Audio(KlaxonAudio);
-klaxon.addEventListener(
-  'ended',
-  () => {
-    klaxon.currentTime = 0;
-    klaxon.play();
-  },
-  false
-);
 
 let login = 'redacted';
 
@@ -63,7 +55,7 @@ export const enableLogin = () =>
 
           disposeKeystrokeHandler();
 
-          login = command;
+          login = command.toLocaleLowerCase();
 
           writeLines(1);
           lines.push('');
@@ -244,6 +236,10 @@ const runConnectionSequence = async () => {
 
   writeLines(1);
   await typewriteString('Welcome Agent.');
+  writeLines(2);
+  await typewriteString(
+    "Try entering the command 'play briefing.mp3' to receive your mission."
+  );
   writeLines(1);
 
   await waitFor(500);
