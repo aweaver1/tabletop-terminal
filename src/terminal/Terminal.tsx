@@ -40,7 +40,7 @@ const buildCommandMap = (
       func: () => {},
     },
     help: {
-      description: 'Prints all available commands with example usages.',
+      description: 'Print all available commands with example usages.',
       func: () => {
         Object.entries(commandMap)
           .filter(([, command]) => !!command.description && !command.hidden)
@@ -70,32 +70,6 @@ const buildCommandMap = (
       ],
       func: (path?: string) => {
         listDirectoryContents(path);
-      },
-    },
-    view: {
-      description: 'View an image file at a given path.',
-      examples: [
-        "'view house.png' opens an image called 'house.png' in current directory'",
-        // TODO: Uncomment me
-        // "'view files/image.png' opens an image called 'image.png' within a directory called 'files' within current directory.",
-        // "'view /files/image.png' opens an image called 'image.png' within a directory called 'files' from root (denoted by leading '/').",
-      ],
-      func: (pathString?: string) => {
-        if (!pathString) {
-          term.writeln(
-            "Expected argument $path. Try 'help' for more information."
-          );
-        } else {
-          const file = getFile(pathString);
-
-          if (file) {
-            if (file.type !== 'image') {
-              term.writeln('Cannot view image, invalid file format.');
-            } else {
-              onOpenImage({ ...file } as Image);
-            }
-          }
-        }
       },
     },
     cd: {
@@ -172,6 +146,32 @@ const buildCommandMap = (
               });
 
               writeLines(1);
+            }
+          }
+        }
+      },
+    },
+    view: {
+      description: 'View an image file at a given path.',
+      examples: [
+        "'view house.png' opens an image called 'house.png' in current directory'",
+        // TODO: Uncomment me
+        // "'view files/image.png' opens an image called 'image.png' within a directory called 'files' within current directory.",
+        // "'view /files/image.png' opens an image called 'image.png' within a directory called 'files' from root (denoted by leading '/').",
+      ],
+      func: (pathString?: string) => {
+        if (!pathString) {
+          term.writeln(
+            "Expected argument $path. Try 'help' for more information."
+          );
+        } else {
+          const file = getFile(pathString);
+
+          if (file) {
+            if (file.type !== 'image') {
+              term.writeln('Cannot view image, invalid file format.');
+            } else {
+              onOpenImage({ ...file } as Image);
             }
           }
         }
